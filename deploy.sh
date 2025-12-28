@@ -199,6 +199,9 @@ configure_docker_compose() {
         log_error "未找到Docker Compose，请手动安装"
         error_exit "Docker Compose未安装"
     fi
+    
+    # 导出COMPOSE_CMD供后续使用
+    export COMPOSE_CMD
 }
 
 # 克隆或更新代码
@@ -216,6 +219,10 @@ clone_or_update_repo() {
         git reset --hard origin/main || error_exit "重置代码失败"
         git clean -fd || error_exit "清理工作目录失败"
     fi
+    
+    # 重新创建日志目录（可能被git clean清理）
+    mkdir -p "${DEPLOY_DIR}/logs"
+    mkdir -p "$(dirname "${DEPLOY_LOG}")" 2>/dev/null || true
     
     # 设置正确的权限
     chown -R root:root "${DEPLOY_DIR}"
@@ -288,22 +295,27 @@ deploy_services() {
     
     cd "${DEPLOY_DIR}"
     
+    # 确保COMPOSE_CMD已设置
+    if [[ -z "${COMPOSE_CMD:-}" ]]; then
+        configure_docker_compose
+    fi
+    
     # 停止现有服务
-    if docker-compose ps -q >/dev/null 2>&1; then
+    if ${COMPOSE_CMD} ps -q >/dev/null 2>&1; then
         log_info "停止现有服务..."
-        docker-compose down >/dev/null 2>&1 || true
+        ${COMPOSE_CMD} down >/dev/null 2>&1 || true
     fi
     
     # 构建并启动服务
     log_info "构建并启动服务..."
-    docker-compose up -d --build || error_exit "服务启动失败"
+    ${COMPOSE_CMD} up -d --build || error_exit "服务启动失败"
     
     # 等待服务启动
     log_info "等待服务启动..."
     sleep 30
     
     # 检查服务状态
-    if docker-compose ps | grep -q "Up"; then
+    if ${COMPOSE_CMD} ps | grep -q "Up"; then
         log_success "服务部署成功"
     else
         error_exit "服务部署失败"
@@ -389,8 +401,14 @@ git clean -fd
 
 # 重新部署服务
 log "重新部署服务..."
-docker-compose down
-docker-compose up -d --build
+cd "${DEPLOY_DIR}"
+if command -v docker-compose >/dev/null 2>&1; then
+    docker-compose down
+    docker-compose up -d --build
+else
+    docker compose down
+    docker compose up -d --build
+fi
 
 log "部署完成"
 EOF
@@ -438,7 +456,7 @@ generate_report() {
 服务器IP: 114.132.189.90
 
 服务状态:
-$(docker-compose ps)
+$(${COMPOSE_CMD:-docker-compose} ps)
 
 访问地址:
 - 主站: http://114.132.189.90
@@ -481,10 +499,10 @@ show_result() {
     echo -e "   🔍 健康检查: ${BLUE}http://114.132.189.90/health${NC}"
     echo ""
     echo -e "${CYAN}🔧 管理命令:${NC}"
-    echo -e "   查看状态: ${YELLOW}cd ${DEPLOY_DIR} && docker-compose ps${NC}"
-    echo -e "   查看日志: ${YELLOW}cd ${DEPLOY_DIR} && docker-compose logs -f${NC}"
-    echo -e "   重启服务: ${YELLOW}cd ${DEPLOY_DIR} && docker-compose restart${NC}"
-    echo -e "   停止服务: ${YELLOW}cd ${DEPLOY_DIR} && docker-compose down${NC}"
+    echo -e "   查看状态: ${YELLOW}cd ${DEPLOY_DIR} && ${COMPOSE_CMD:-docker-compose} ps${NC}"
+    echo -e "   查看日志: ${YELLOW}cd ${DEPLOY_DIR} && ${COMPOSE_CMD:-docker-compose} logs -f${NC}"
+    echo -e "   重启服务: ${YELLOW}cd ${DEPLOY_DIR} && ${COMPOSE_CMD:-docker-compose} restart${NC}"
+    echo -e "   停止服务: ${YELLOW}cd ${DEPLOY_DIR} && ${COMPOSE_CMD:-docker-compose} down${NC}"
     echo ""
     echo -e "${CYAN}📊 部署报告:${NC}"
     echo -e "   ${YELLOW}cat ${DEPLOY_DIR}/deploy-report.txt${NC}"
