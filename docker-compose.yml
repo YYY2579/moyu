@@ -3,11 +3,11 @@ services:
     image: mysql:5.7.44
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      TZ: ${TZ}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-moyu_study}
+      MYSQL_USER: ${MYSQL_USER:-moyu}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-Aa123456}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Aa123456}
+      TZ: ${TZ:-Asia/Shanghai}
     ports:
       - "127.0.0.1:33066:3306"
     volumes:
@@ -30,14 +30,14 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      TZ: ${TZ}
+      TZ: ${TZ:-Asia/Shanghai}
       PORT: 8080
       DATABASE_HOST: mysql
       DATABASE_PORT: 3306
-      DATABASE_NAME: ${MYSQL_DATABASE}
-      DATABASE_USER: ${MYSQL_USER}
-      DATABASE_PASSWORD: ${MYSQL_PASSWORD}
-      ADMIN_TOKEN: ${ADMIN_TOKEN}
+      DATABASE_NAME: ${MYSQL_DATABASE:-moyu_study}
+      DATABASE_USER: ${MYSQL_USER:-moyu}
+      DATABASE_PASSWORD: ${MYSQL_PASSWORD:-Aa123456}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-moyu_admin_token_2024}
     depends_on:
       mysql:
         condition: service_healthy
@@ -47,6 +47,8 @@ services:
       context: ./web
       dockerfile: Dockerfile
     restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
     ports:
       - "80:80"
     links:

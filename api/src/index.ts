@@ -1,69 +1,55 @@
-import Fastify from "fastify"
-import cors from "@fastify/cors"
-import sensible from "@fastify/sensible"
-import { loadEnv } from "./env.js"
-import { createDb, pingDb } from "./db.js"
-import { seedIfEmpty } from "./seed/seed.js"
-import { registerHealthRoutes } from "./routes/health.js"
-import { registerQuestionRoutes } from "./routes/questions.js"
-import { registerAttemptRoutes } from "./routes/attempts.js"
-import { registerDailyRoutes } from "./routes/daily.js"
-import { registerCommandRoutes } from "./routes/commands.js"
-import { registerDeviceRoutes } from "./routes/devices.js"
-import { registerAdminRoutes } from "./routes/admin.js"
+import express, { Request, Response } from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
+import morgan from 'morgan';
+import rateLimit from 'express-rate-limit';
+import healthRoutes from './routes/health';
 
-const env = loadEnv()
-const isProd = process.env.NODE_ENV === "production"
+const app = express();
+const PORT = process.env.PORT || 8080;
 
-const app = Fastify({
-  logger: isProd ? true : {
-    transport: {
-      target: "pino-pretty",
-      options: { translateTime: "SYS:standard", singleLine: true }
-    }
-  }
-})
+// 中间件配置
+app.use(helmet());
+app.use(cors());
+app.use(compression());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-async function start() {
-  try {
-    await app.register(cors, { origin: true })
-    await app.register(sensible)
+// 日志中间件
+app.use(morgan('combined'));
 
-    const db = createDb(env)
-    app.log.info("Connecting to database...")
-    await pingDb(db)
-    
-    app.log.info("Checking database seed...")
-    await seedIfEmpty(db)
+// 速率限制
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15分钟
+  max: 100 // 每个IP最多100个请求
+});
+app.use('/api/', limiter);
 
-    // 统一注册带 /api 前缀的路由
-    await app.register(async (api) => {
-      await registerHealthRoutes(api, db)
-      await registerDeviceRoutes(api, db)
-      await registerQuestionRoutes(api, db)
-      await registerAttemptRoutes(api, db)
-      await registerDailyRoutes(api, db)
-      await registerCommandRoutes(api, db)
-      await registerAdminRoutes(api, db, env)
-    }, { prefix: "/api" })
+// 健康检查路由
+app.use('/', healthRoutes);
 
-    app.get("/", async () => ({ ok: true }))
-    app.get("/health", async () => {
-      try {
-        await db.query("SELECT 1")
-        return { ok: true, status: "healthy" }
-      } catch (error) {
-        app.log.error("Health check failed:", error)
-        throw app.httpErrors.serviceUnavailable("Service unavailable")
-      }
-    })
+// 404处理
+app.use((req: Request, res: Response) => {
+  res.status(404).json({ 
+    error: 'Not Found',
+    path: req.path 
+  });
+});
 
-    await app.listen({ port: env.PORT, host: "0.0.0.0" })
-    app.log.info(`Server listening on port ${env.PORT}`)
-  } catch (err) {
-    app.log.error(err)
-    process.exit(1)
-  }
-}
+// 错误处理
+app.use((err: any, req: Request, res: Response, next: any) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    error: 'Internal Server Error',
+    message: err.message 
+  });
+});
 
-start()
+// 启动服务器
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`📊 Health check: http://localhost:${PORT}/health`);
+});
+
+export default app;
