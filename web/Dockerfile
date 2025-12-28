@@ -7,7 +7,7 @@ FROM node:20-alpine AS build
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json* ./
-COPY index.html vite.config.ts tsconfig.json tailwind.config.js postcss.config.js ./
+COPY index.html vite.config.ts tsconfig.json tsconfig.node.json tailwind.config.js postcss.config.js ./
 COPY src ./src
 RUN npm run build
 
