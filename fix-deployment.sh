@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🔧 修复部署问题"
+echo "🔧 修复部署问题（端口冲突版本）"
 echo "=========================="
 
 # 1. 停止并清理所有相关容器
@@ -15,8 +15,16 @@ docker stop web 2>/dev/null || true
 docker rm web 2>/dev/null || true
 docker stop api 2>/dev/null || true
 docker rm api 2>/dev/null || true
+docker stop moyu-study-2-mysql-1 2>/dev/null || true
+docker rm moyu-study-2-mysql-1 2>/dev/null || true
 
-# 2. 清理未使用的网络
+# 2. 杀死占用端口的进程
+echo "🔫 杀死占用33066端口的进程..."
+if command -v netstat >/dev/null 2>&1; then
+    netstat -tulpn | grep :33066 | awk '{print $7}' | cut -d'/' -f1 | xargs -r kill -9 2>/dev/null || true
+fi
+
+# 3. 清理未使用的网络
 echo "🌐 清理Docker网络..."
 docker network prune -f 2>/dev/null || true
 
