@@ -17,7 +17,7 @@
       "and": [
         {
           "match": {
-            "type": "payload-hash-sha1",
+            "type": "payload-hmac-sha1",
             "secret": "YOUR_WEBHOOK_SECRET_HERE",
             "parameter": {
               "source": "header",
