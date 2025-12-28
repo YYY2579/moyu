@@ -20,11 +20,3 @@ app.mount('#app')
 initPerformanceOptimizations()
 
 console.log('App mounted successfully!')
-
-const app = createApp(App)
-
-app.use(createPinia())
-app.use(router)
-app.use(ElementPlus)
-
-app.mount('#app')

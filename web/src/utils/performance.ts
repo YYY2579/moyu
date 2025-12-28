@@ -322,5 +322,3 @@ export function initPerformanceOptimizations() {
   console.log('性能优化初始化完成')
 }
 
-// 从 vue 中导入 ref
-import { ref, onMounted, onUnmounted } from 'vue'
