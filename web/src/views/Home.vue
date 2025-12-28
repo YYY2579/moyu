@@ -15,7 +15,7 @@
               </template>
               <div class="card-content">
                 <p>管理各类题目，支持批量导入导出</p>
-                <el-button type="primary" plain>查看题库</el-button>
+                <el-button type="primary" plain @click="handleQuestionLibrary">查看题库</el-button>
               </div>
             </el-card>
           </el-col>
@@ -28,7 +28,7 @@
               </template>
               <div class="card-content">
                 <p>每日智能推荐练习题目</p>
-                <el-button type="success" plain>开始练习</el-button>
+                <el-button type="success" plain @click="handlePractice">开始练习</el-button>
               </div>
             </el-card>
           </el-col>
@@ -41,7 +41,7 @@
               </template>
               <div class="card-content">
                 <p>查看学习进度和统计数据</p>
-                <el-button type="warning" plain>查看统计</el-button>
+                <el-button type="warning" plain @click="handleStats">查看统计</el-button>
               </div>
             </el-card>
           </el-col>
@@ -65,8 +65,28 @@
 </template>
 
 <script setup lang="ts">
+import { ElMessage } from 'element-plus'
+
 // Home page component
 console.log('Home component loaded')
+
+// 处理查看题库
+const handleQuestionLibrary = () => {
+  ElMessage.success('题库功能开发中...')
+  console.log('点击查看题库')
+}
+
+// 处理开始练习
+const handlePractice = () => {
+  ElMessage.success('练习功能开发中...')
+  console.log('点击开始练习')
+}
+
+// 处理查看统计
+const handleStats = () => {
+  ElMessage.success('统计功能开发中...')
+  console.log('点击查看统计')
+}
 </script>
 
 <style scoped>
