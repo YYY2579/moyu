@@ -1,0 +1,41 @@
+[
+  {
+    "id": "auto-deploy",
+    "execute-command": "/bin/sh",
+    "command-working-directory": "/opt/moyu",
+    "pass-arguments-to-command": [
+      {
+        "source": "string",
+        "name": "-c"
+      },
+      {
+        "source": "string",
+        "name": "/opt/moyu/scripts/webhook-handler.sh"
+      }
+    ],
+    "trigger-rule": {
+      "and": [
+        {
+          "match": {
+            "type": "payload-hash-sha1",
+            "secret": "YOUR_WEBHOOK_SECRET_HERE",
+            "parameter": {
+              "source": "header",
+              "name": "X-Hub-Signature"
+            }
+          }
+        },
+        {
+          "match": {
+            "type": "value",
+            "value": "refs/heads/main",
+            "parameter": {
+              "source": "payload",
+              "name": "ref"
+            }
+          }
+        }
+      ]
+    }
+  }
+]

@@ -56,3 +56,21 @@ services:
     depends_on:
       - api
 
+  webhook:
+    image: almir/webhook:latest
+    container_name: webhook
+    restart: unless-stopped
+    volumes:
+      - ./webhook.json:/etc/webhook/hooks.json:ro
+      - ./scripts:/opt/moyu/scripts:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "9000:9000"
+    command: ["-hooks", "/etc/webhook/hooks.json", "-verbose"]
+    networks:
+      - moyu-network
+
+networks:
+  moyu-network:
+    driver: bridge
+
