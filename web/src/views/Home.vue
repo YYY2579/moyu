@@ -1,158 +1,95 @@
 <template>
   <div class="home">
-    <el-container>
-      <el-header class="header">
-        <div class="header-content">
-          <h1>🐟 摸鱼学习站</h1>
-          <p class="subtitle">专注 Linux & Docker 技术学习平台</p>
+    <!-- 主导航区域 -->
+    <div class="hero-section">
+      <div class="hero-content">
+        <h1 class="site-title">摸鱼学习站</h1>
+        <p class="site-desc">Linux & Docker 技术学习平台</p>
+        <div class="hero-stats">
+          <span class="stat-item">150+ Linux命令</span>
+          <span class="stat-divider">|</span>
+          <span class="stat-item">80+ Docker知识点</span>
+          <span class="stat-divider">|</span>
+          <span class="stat-item">500+ 练习题</span>
         </div>
-      </el-header>
-      
-      <el-main class="main">
-        <!-- 学习统计卡片 -->
-        <el-row :gutter="20" class="stats-row">
-          <el-col :xs="24" :sm="8">
-            <el-card class="stat-card">
-              <div class="stat-content">
-                <div class="stat-icon">📚</div>
-                <div class="stat-info">
-                  <div class="stat-number">150+</div>
-                  <div class="stat-label">Linux 命令</div>
-                </div>
-              </div>
-            </el-card>
-          </el-col>
-          <el-col :xs="24" :sm="8">
-            <el-card class="stat-card">
-              <div class="stat-content">
-                <div class="stat-icon">🐳</div>
-                <div class="stat-info">
-                  <div class="stat-number">80+</div>
-                  <div class="stat-label">Docker 知识点</div>
-                </div>
-              </div>
-            </el-card>
-          </el-col>
-          <el-col :xs="24" :sm="8">
-            <el-card class="stat-card">
-              <div class="stat-content">
-                <div class="stat-icon">✅</div>
-                <div class="stat-info">
-                  <div class="stat-number">500+</div>
-                  <div class="stat-label">练习题目</div>
-                </div>
-              </div>
-            </el-card>
-          </el-col>
-        </el-row>
+      </div>
+    </div>
 
-        <!-- 主要学习模块 -->
-        <el-row :gutter="20" class="modules-row">
-          <el-col :xs="24" :md="12">
-            <el-card class="module-card" shadow="hover" @click="goToLinux">
-              <template #header>
-                <div class="module-header">
-                  <span class="module-icon">🐧</span>
-                  <span class="module-title">Linux 命令学习</span>
-                </div>
-              </template>
-              <div class="module-content">
-                <p>系统学习 Linux 常用命令，从基础到进阶</p>
-                <div class="module-features">
-                  <el-tag size="small">文件操作</el-tag>
-                  <el-tag size="small" type="success">系统管理</el-tag>
-                  <el-tag size="small" type="warning">网络配置</el-tag>
-                  <el-tag size="small" type="danger">Shell 脚本</el-tag>
-                </div>
-                <el-button type="primary" class="module-btn" @click.stop="goToLinux">
-                  开始学习
-                </el-button>
-              </div>
-            </el-card>
-          </el-col>
-          
-          <el-col :xs="24" :md="12">
-            <el-card class="module-card" shadow="hover" @click="goToDocker">
-              <template #header>
-                <div class="module-header">
-                  <span class="module-icon">🐳</span>
-                  <span class="module-title">Docker 容器技术</span>
-                </div>
-              </template>
-              <div class="module-content">
-                <p>掌握 Docker 容器化技术，提升部署效率</p>
-                <div class="module-features">
-                  <el-tag size="small">基础概念</el-tag>
-                  <el-tag size="small" type="success">镜像管理</el-tag>
-                  <el-tag size="small" type="warning">容器编排</el-tag>
-                  <el-tag size="small" type="danger">实践项目</el-tag>
-                </div>
-                <el-button type="primary" class="module-btn" @click.stop="goToDocker">
-                  开始学习
-                </el-button>
-              </div>
-            </el-card>
-          </el-col>
-        </el-row>
-
-        <!-- 快速功能区 -->
-        <el-row :gutter="20" class="quick-actions">
-          <el-col :xs="24" :sm="8">
-            <el-card class="action-card" shadow="hover" @click="startPractice">
-              <div class="action-content">
-                <div class="action-icon">✏️</div>
-                <div class="action-info">
-                  <h3>每日练习</h3>
-                  <p>随机练习题目，巩固知识</p>
-                </div>
-              </div>
-            </el-card>
-          </el-col>
-          
-          <el-col :xs="24" :sm="8">
-            <el-card class="action-card" shadow="hover" @click="viewProgress">
-              <div class="action-content">
-                <div class="action-icon">📊</div>
-                <div class="action-info">
-                  <h3>学习进度</h3>
-                  <p>查看学习统计和成就</p>
-                </div>
-              </div>
-            </el-card>
-          </el-col>
-          
-          <el-col :xs="24" :sm="8">
-            <el-card class="action-card" shadow="hover" @click="showBookmarks">
-              <div class="action-content">
-                <div class="action-icon">🔖</div>
-                <div class="action-info">
-                  <h3>我的收藏</h3>
-                  <p>收藏重要的学习内容</p>
-                </div>
-              </div>
-            </el-card>
-          </el-col>
-        </el-row>
-
-        <!-- 最近学习 -->
-        <el-card class="recent-card">
-          <template #header>
-            <div class="recent-header">
-              <span>🕒 最近学习</span>
-              <el-link type="primary" @click="viewAllHistory">查看全部</el-link>
-            </div>
-          </template>
-          <el-empty v-if="!recentLearning.length" description="暂无学习记录" />
-          <div v-else class="recent-list">
-            <div v-for="item in recentLearning" :key="item.id" class="recent-item">
-              <el-tag :type="item.type" size="small">{{ item.category }}</el-tag>
-              <span class="recent-title">{{ item.title }}</span>
-              <span class="recent-time">{{ item.time }}</span>
+    <!-- 主要内容区域 -->
+    <div class="main-content">
+      <!-- 学习模块 -->
+      <div class="modules-section">
+        <h2 class="section-title">学习模块</h2>
+        <div class="modules-grid">
+          <div class="module-item" @click="goToLinux">
+            <div class="module-icon">🐧</div>
+            <h3 class="module-name">Linux 命令</h3>
+            <p class="module-desc">系统学习Linux常用命令</p>
+            <div class="module-tags">
+              <span class="tag">文件操作</span>
+              <span class="tag">系统管理</span>
+              <span class="tag">网络配置</span>
             </div>
           </div>
-        </el-card>
-      </el-main>
-    </el-container>
+          
+          <div class="module-item" @click="goToDocker">
+            <div class="module-icon">🐳</div>
+            <h3 class="module-name">Docker 技术</h3>
+            <p class="module-desc">掌握容器化部署技术</p>
+            <div class="module-tags">
+              <span class="tag">基础概念</span>
+              <span class="tag">镜像管理</span>
+              <span class="tag">容器编排</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+        <!-- 快速功能 -->
+        <div class="actions-section">
+          <h2 class="section-title">快速功能</h2>
+          <div class="actions-grid">
+            <div class="action-item" @click="startPractice">
+              <div class="action-icon">✏️</div>
+              <span class="action-name">每日练习</span>
+            </div>
+            <div class="action-item" @click="viewProgress">
+              <div class="action-icon">📊</div>
+              <span class="action-name">学习进度</span>
+            </div>
+            <div class="action-item" @click="openTools">
+              <div class="action-icon">🛠️</div>
+              <span class="action-name">学习工具</span>
+            </div>
+            <div class="action-item" @click="openShortcuts">
+              <div class="action-icon">⌨️</div>
+              <span class="action-name">快捷键参考</span>
+            </div>
+            <div class="action-item" @click="showBookmarks">
+              <div class="action-icon">🔖</div>
+              <span class="action-name">我的收藏</span>
+            </div>
+          </div>
+        </div>
+
+      <!-- 最近学习 -->
+      <div class="recent-section">
+        <div class="section-header">
+          <h2 class="section-title">最近学习</h2>
+          <a href="#" class="view-all" @click="viewAllHistory">查看全部</a>
+        </div>
+        <div v-if="!recentLearning.length" class="empty-state">
+          <p>暂无学习记录</p>
+        </div>
+        <div v-else class="recent-list">
+          <div v-for="item in recentLearning" :key="item.id" class="recent-item">
+            <span class="recent-category">{{ item.category }}</span>
+            <span class="recent-title">{{ item.title }}</span>
+            <span class="recent-time">{{ item.time }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -201,6 +138,16 @@ const viewProgress = () => {
   router.push('/progress')
 }
 
+// 打开学习工具
+const openTools = () => {
+  router.push('/tools')
+}
+
+// 打开快捷键参考
+const openShortcuts = () => {
+  router.push('/shortcuts')
+}
+
 // 查看收藏
 const showBookmarks = () => {
   ElMessage.info('收藏功能开发中...')
@@ -219,325 +166,328 @@ const viewAllHistory = () => {
 <style scoped>
 .home {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #f8f9fa;
 }
 
-.header {
-  background: linear-gradient(135deg, #409eff 0%, #364d79 100%);
-  color: white;
-  padding: 40px 20px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+/* Hero区域 */
+.hero-section {
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  padding: 40px 0;
 }
 
-.header-content h1 {
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-.subtitle {
-  font-size: 18px;
-  opacity: 0.9;
-  margin: 0;
-  font-weight: 300;
-}
-
-.main {
-  padding: 30px 20px;
-  max-width: 1400px;
+.hero-content {
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 0 20px;
+  text-align: center;
 }
 
-/* 统计卡片 */
-.stats-row {
-  margin-bottom: 30px;
-}
-
-.stat-card {
-  border: none;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-}
-
-.stat-content {
-  display: flex;
-  align-items: center;
-  padding: 20px;
-}
-
-.stat-icon {
-  font-size: 36px;
-  margin-right: 16px;
-}
-
-.stat-number {
-  font-size: 28px;
-  font-weight: 700;
-  color: #409eff;
-  line-height: 1;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #666;
-  margin-top: 4px;
-}
-
-/* 学习模块卡片 */
-.modules-row {
-  margin-bottom: 30px;
-}
-
-.module-card {
-  border: none;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  height: 100%;
-}
-
-.module-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.18);
-}
-
-.module-header {
-  display: flex;
-  align-items: center;
-  font-size: 18px;
+.site-title {
+  font-size: 32px;
   font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
 }
 
-.module-icon {
-  font-size: 24px;
-  margin-right: 12px;
+.site-desc {
+  font-size: 16px;
+  color: #6c757d;
+  margin: 0 0 20px 0;
 }
 
-.module-content {
-  padding: 0;
-}
-
-.module-content p {
-  color: #666;
-  line-height: 1.6;
-  margin-bottom: 16px;
-}
-
-.module-features {
+.hero-stats {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.stat-item {
+  color: #007bff;
+}
+
+.stat-divider {
+  color: #dee2e6;
+}
+
+/* 主内容区域 */
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* 通用样式 */
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 20px 0;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
 }
 
-.module-btn {
-  width: 100%;
-  margin-top: 12px;
+.view-all {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s;
 }
 
-/* 快速功能区 */
-.quick-actions {
-  margin-bottom: 30px;
+.view-all:hover {
+  color: #0056b3;
+  text-decoration: underline;
 }
 
-.action-card {
-  border: none;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
+/* 学习模块 */
+.modules-section {
+  margin-bottom: 40px;
+}
+
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.module-item {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
   cursor: pointer;
-  height: 100%;
+  transition: all 0.3s ease;
 }
 
-.action-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+.module-item:hover {
+  border-color: #007bff;
+  box-shadow: 0 4px 12px rgba(0,123,255,0.15);
+  transform: translateY(-2px);
 }
 
-.action-content {
+.module-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.module-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+}
+
+.module-desc {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.module-tags {
   display: flex;
-  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: #e9ecef;
+  color: #495057;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* 快速功能 */
+.actions-section {
+  margin-bottom: 40px;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+.action-item {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
   padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-item:hover {
+  border-color: #007bff;
+  background: #f8f9ff;
 }
 
 .action-icon {
   font-size: 32px;
-  margin-right: 16px;
+  margin-bottom: 8px;
 }
 
-.action-info h3 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-}
-
-.action-info p {
-  margin: 0;
+.action-name {
   font-size: 14px;
-  color: #666;
-  line-height: 1.4;
+  color: #2c3e50;
+  font-weight: 500;
 }
 
 /* 最近学习 */
-.recent-card {
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.recent-section {
+  margin-bottom: 40px;
 }
 
-.recent-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 16px;
-  font-weight: 600;
+.empty-state {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
+  color: #6c757d;
 }
 
 .recent-list {
-  max-height: 300px;
-  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .recent-item {
   display: flex;
   align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f3f4;
+  transition: background 0.3s ease;
 }
 
 .recent-item:last-child {
   border-bottom: none;
 }
 
+.recent-item:hover {
+  background: #f8f9fa;
+}
+
+.recent-category {
+  background: #007bff;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-right: 12px;
+  min-width: 60px;
+  text-align: center;
+}
+
 .recent-title {
   flex: 1;
-  margin: 0 12px;
-  color: #333;
+  color: #2c3e50;
   font-size: 14px;
+  margin-right: 12px;
 }
 
 .recent-time {
-  color: #999;
+  color: #6c757d;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  /* 首页在移动端隐藏header，使用移动端导航 */
-  .header {
-    display: none;
+  .hero-section {
+    padding: 30px 0;
   }
   
-  .main {
-    padding: 30px 15px 20px; /* 顶部留出空间给移动端菜单按钮 */
-  }
-  
-  /* 统计卡片优化 */
-  .stats-row {
-    margin-bottom: 20px;
-  }
-  
-  .stat-content {
-    padding: 16px;
-    justify-content: center;
-    text-align: center;
-  }
-  
-  .stat-icon {
-    font-size: 28px;
-    margin-right: 0;
-    margin-bottom: 8px;
-  }
-  
-  .stat-number {
+  .site-title {
     font-size: 24px;
   }
   
-  .stat-label {
-    font-size: 12px;
-  }
-  
-  /* 学习模块卡片优化 */
-  .modules-row {
-    margin-bottom: 20px;
-  }
-  
-  .module-card {
-    margin-bottom: 16px;
-  }
-  
-  .module-header {
-    font-size: 16px;
-  }
-  
-  .module-icon {
-    font-size: 20px;
-  }
-  
-  .module-content p {
-    font-size: 13px;
-    margin-bottom: 12px;
-  }
-  
-  .module-features {
-    margin-bottom: 16px;
-  }
-  
-  .module-btn {
-    padding: 8px 16px;
+  .site-desc {
     font-size: 14px;
   }
   
-  /* 快速功能区优化 */
-  .quick-actions {
-    margin-bottom: 20px;
+  .hero-stats {
+    font-size: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
   }
   
-  .action-content {
-    padding: 16px;
+  .stat-divider {
+    display: none;
+  }
+  
+  .main-content {
+    padding: 30px 15px;
+  }
+  
+  .modules-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .module-item {
+    padding: 20px;
+  }
+  
+  .module-icon {
+    font-size: 40px;
+  }
+  
+  .module-name {
+    font-size: 16px;
+  }
+  
+  .module-desc {
+    font-size: 13px;
+  }
+  
+  .actions-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  
+  .action-item {
+    padding: 16px 12px;
   }
   
   .action-icon {
     font-size: 28px;
-    margin-right: 12px;
   }
   
-  .action-info h3 {
-    font-size: 14px;
-  }
-  
-  .action-info p {
+  .action-name {
     font-size: 12px;
   }
   
-  /* 最近学习优化 */
-  .recent-card {
-    margin-bottom: 20px;
-  }
-  
-  .recent-header {
-    font-size: 14px;
-  }
-  
   .recent-item {
-    padding: 10px 0;
+    padding: 12px 16px;
+  }
+  
+  .recent-category {
+    min-width: 50px;
+    margin-right: 8px;
   }
   
   .recent-title {
     font-size: 13px;
+    margin-right: 8px;
   }
   
   .recent-time {
@@ -546,18 +496,34 @@ const viewAllHistory = () => {
 }
 
 @media (max-width: 480px) {
-  .header {
-    padding: 30px 15px;
+  .hero-content {
+    padding: 0 15px;
   }
   
-  .main {
-    padding: 15px 10px;
+  .main-content {
+    padding: 20px 10px;
   }
   
-  .stats-row,
-  .modules-row,
-  .quick-actions {
-    margin-bottom: 20px;
+  .module-item {
+    padding: 16px;
+  }
+  
+  .actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .recent-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .recent-category {
+    margin-right: 0;
+  }
+  
+  .recent-title {
+    margin-right: 0;
   }
 }
 </style>

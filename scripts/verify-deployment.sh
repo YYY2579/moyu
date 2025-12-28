@@ -1,277 +1,237 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/bash
 
-# =============================================================================
-# ✅ 部署验证脚本
-# 验证摸鱼学习站CentOS 7部署的正确性
-# =============================================================================
+echo "🔍 验证部署结果..."
+echo "================================"
 
-# 颜色定义
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-NC='\033[0m'
+# 设置变量
+PROJECT_DIR="/opt/moyu"
+SERVER_IP=$(curl -s ifconfig.me 2>/dev/null || curl -s ipinfo.io/ip 2>/dev/null || echo "localhost")
+TEST_RESULTS=()
 
-log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-log_success() { echo -e "${GREEN}[PASS]${NC} $1"; }
-log_warning() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-log_error() { echo -e "${RED}[FAIL]${NC} $1"; }
-log_step() { echo -e "${PURPLE}[STEP]${NC} $1"; }
-
-echo -e "${PURPLE}"
-echo "=============================================================================="
-echo "✅ 摸鱼学习站 - 部署验证"
-echo "=============================================================================="
-echo -e "${NC}"
-
-# 获取项目目录
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-cd "$PROJECT_ROOT"
-
-# 验证计数器
-TOTAL_CHECKS=0
-PASSED_CHECKS=0
-
-# 验证函数
-verify() {
-    local test_name="$1"
-    local test_command="$2"
-    
-    TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
-    
-    if eval "$test_command" >/dev/null 2>&1; then
-        log_success "$test_name"
-        PASSED_CHECKS=$((PASSED_CHECKS + 1))
-        return 0
-    else
-        log_error "$test_name"
-        return 1
-    fi
+# 进入项目目录
+cd "$PROJECT_DIR" || {
+    echo "❌ 无法进入项目目录: $PROJECT_DIR"
+    exit 1
 }
 
-# =============================================================================
-# 1. 系统环境验证
-# =============================================================================
-log_step "1. 系统环境验证"
-
-verify "CentOS 7操作系统" "grep -q 'CentOS Linux release 7' /etc/redhat-release"
-verify "Root权限" "[ \$(id -u) -eq 0 ]"
-verify "Docker 23.x版本" "docker --version | grep -q '23.'"
-verify "Docker Compose 2.5版本" "docker-compose version | grep -q '2.5'"
-verify "Docker服务运行" "systemctl is-active --quiet docker"
-verify "防火墙服务运行" "systemctl is-active --quiet firewalld"
-
+echo "🧪 执行部署验证测试..."
 echo ""
 
-# =============================================================================
-# 2. 项目文件验证
-# =============================================================================
-log_step "2. 项目文件验证"
-
-verify "项目目录存在" "[ -d '$PROJECT_ROOT' ]"
-verify "环境配置文件存在" "[ -f '.env' ]"
-verify "Docker Compose配置存在" "[ -f 'docker-compose.yml' ]"
-verify "部署配置备份存在" "[ -f 'deploy-config.txt' ]"
-verify "API目录存在" "[ -d 'api/src' ]"
-verify "Web目录存在" "[ -d 'web/src' ]"
-verify "数据目录存在" "[ -d 'deploy/volumes' ]"
-
-echo ""
-
-# =============================================================================
-# 3. 配置内容验证
-# =============================================================================
-log_step "3. 配置内容验证"
-
-verify "数据库密码配置" "grep -q 'MYSQL_PASSWORD=Aa123456' .env"
-verify "数据库Root密码配置" "grep -q 'MYSQL_ROOT_PASSWORD=Aa123456' .env"
-verify "服务器IP配置" "grep -q 'SERVER_IP=114.132.189.90' .env"
-verify "时区配置" "grep -q 'TZ=Asia/Shanghai' .env"
-verify "数据库名称配置" "grep -q 'MYSQL_DATABASE=study_site' .env"
-
-echo ""
-
-# =============================================================================
-# 4. Docker镜像验证
-# =============================================================================
-log_step "4. Docker镜像验证"
-
-verify "MySQL镜像存在" "docker images -q mysql:5.7.44 | grep -q ."
-verify "API镜像构建" "docker images -q moyu-study-2-api | grep -q ."
-verify "Web镜像构建" "docker images -q moyu-study-2-web | grep -q ."
-
-echo ""
-
-# =============================================================================
-# 5. 容器状态验证
-# =============================================================================
-log_step "5. 容器状态验证"
-
-verify "MySQL容器运行" "docker-compose ps -q mysql | grep -q ."
-verify "API容器运行" "docker-compose ps -q api | grep -q ."
-verify "Web容器运行" "docker-compose ps -q web | grep -q ."
-
-# 检查容器健康状态
-if verify "MySQL健康状态" "docker inspect -f '{{.State.Health.Status}}' \$(docker-compose ps -q mysql) | grep -q healthy"; then
-    log_success "MySQL健康状态正常"
+# 测试1: 检查容器状态
+echo "📋 测试1: 容器状态检查"
+if docker-compose ps | grep -q "Up"; then
+    echo "✅ 容器状态正常"
+    TEST_RESULTS+=("containers:pass")
 else
-    log_warning "MySQL健康状态检查中..."
+    echo "❌ 容器状态异常"
+    TEST_RESULTS+=("containers:fail")
 fi
 
+# 测试2: HTTP服务响应
 echo ""
+echo "📋 测试2: HTTP服务响应"
+WEB_RESPONSE=$(curl -s -w "%{http_code}" -o /dev/null http://localhost/health || echo "000")
+API_RESPONSE=$(curl -s -w "%{http_code}" -o /dev/null http://localhost:8080/health || echo "000")
 
-# =============================================================================
-# 6. 网络服务验证
-# =============================================================================
-log_step "6. 网络服务验证"
-
-verify "HTTP端口监听" "netstat -tlnp 2>/dev/null | grep -q ':80 '"
-verify "MySQL端口监听(本机)" "netstat -tlnp 2>/dev/null | grep -q ':33066 '"
-
-echo ""
-
-# =============================================================================
-# 7. 应用服务验证
-# =============================================================================
-log_step "7. 应用服务验证"
-
-# API健康检查
-API_STATUS=0
-if curl -s -f "http://localhost/api/health" >/dev/null 2>&1; then
-    API_RESPONSE=$(curl -s "http://localhost/api/health" 2>/dev/null || echo "{}")
-    if echo "$API_RESPONSE" | grep -q "healthy\|ok"; then
-        log_success "API服务响应正常"
-        API_STATUS=1
-    else
-        log_error "API服务响应异常"
-    fi
+if [ "$WEB_RESPONSE" = "200" ]; then
+    echo "✅ Web服务响应正常 (HTTP $WEB_RESPONSE)"
+    WEB_TEST="pass"
 else
-    log_error "API服务无响应"
+    echo "❌ Web服务响应异常 (HTTP $WEB_RESPONSE)"
+    WEB_TEST="fail"
 fi
 
-# Web服务检查
-if curl -s -f "http://localhost/" >/dev/null 2>&1; then
-    log_success "Web服务访问正常"
-    WEB_STATUS=1
+if [ "$API_RESPONSE" = "200" ]; then
+    echo "✅ API服务响应正常 (HTTP $API_RESPONSE)"
+    API_TEST="pass"
 else
-    log_error "Web服务访问失败"
-    WEB_STATUS=0
+    echo "❌ API服务响应异常 (HTTP $API_RESPONSE)"
+    API_TEST="fail"
 fi
 
-# 数据库连接检查
-if docker-compose exec -T mysql mysqladmin ping -h localhost -u root -pAa123456 >/dev/null 2>&1; then
-    log_success "数据库连接正常"
-    DB_STATUS=1
-else
-    log_error "数据库连接失败"
-    DB_STATUS=0
-fi
+TEST_RESULTS+=("web:$WEB_TEST")
+TEST_RESULTS+=("api:$API_TEST")
 
+# 测试3: 数据库连接
 echo ""
+echo "📋 测试3: 数据库连接"
+if docker-compose exec -T mysql mysqladmin ping -h"localhost" --silent 2>/dev/null; then
+    echo "✅ 数据库连接正常"
+    DB_CONN_TEST="pass"
+else
+    echo "❌ 数据库连接失败"
+    DB_CONN_TEST="fail"
+fi
 
-# =============================================================================
-# 8. 功能验证
-# =============================================================================
-log_step "8. 功能验证"
+TEST_RESULTS+=("database:$DB_CONN_TEST")
 
-# 检查API端点
+# 测试4: 基本功能测试
+echo ""
+echo "📋 测试4: 基本功能测试"
+
+# 测试API端点
 API_ENDPOINTS=(
-    "http://localhost/api/questions"
-    "http://localhost/api/meta"
-    "http://localhost/api/health"
+    "/api/questions"
+    "/api/meta"
+    "/api/stats"
 )
 
+API_FUNCTIONAL="pass"
 for endpoint in "${API_ENDPOINTS[@]}"; do
-    if curl -s -f "$endpoint" >/dev/null 2>&1; then
-        log_success "API端点可访问: $(basename "$endpoint")"
-    else
-        log_warning "API端点不可访问: $(basename "$endpoint")"
+    RESPONSE=$(curl -s -w "%{http_code}" -o /dev/null "http://localhost:8080$endpoint" || echo "000")
+    if [ "$RESPONSE" != "200" ]; then
+        echo "❌ API端点 $endpoint 响应异常 (HTTP $RESPONSE)"
+        API_FUNCTIONAL="fail"
     fi
 done
 
-echo ""
-
-# =============================================================================
-# 验证结果总结
-# =============================================================================
-echo -e "${PURPLE}"
-echo "=============================================================================="
-echo "📊 验证结果总结"
-echo "=============================================================================="
-echo -e "${NC}"
-
-# 计算通过率
-PASS_RATE=$((PASSED_CHECKS * 100 / TOTAL_CHECKS))
-
-echo -e "${BLUE}验证统计:${NC}"
-echo -e "   📊 总检查项目: ${YELLOW}$TOTAL_CHECKS${NC}"
-echo -e "   ✅ 通过项目: ${GREEN}$PASSED_CHECKS${NC}"
-echo -e "   ❌ 失败项目: ${RED}$((TOTAL_CHECKS - PASSED_CHECKS))${NC}"
-echo -e "   📈 通过率: ${YELLOW}$PASS_RATE%${NC}"
-echo ""
-
-# 关键服务状态
-echo -e "${BLUE}关键服务状态:${NC}"
-echo -e "   🌐 Web服务: ${([ "$WEB_STATUS" -eq 1 ] && echo "${GREEN}正常${NC}" || echo "${RED}异常${NC}")"
-echo -e "   🔧 API服务: ${([ "$API_STATUS" -eq 1 ] && echo "${GREEN}正常${NC}" || echo "${RED}异常${NC}")"
-echo -e "   🗄️  数据库服务: ${([ "$DB_STATUS" -eq 1 ] && echo "${GREEN}正常${NC}" || echo "${RED}异常${NC}")"
-echo ""
-
-# 部署建议
-if [ "$PASS_RATE" -ge 90 ] && [ "$WEB_STATUS" -eq 1 ] && [ "$API_STATUS" -eq 1 ] && [ "$DB_STATUS" -eq 1 ]; then
-    echo -e "${GREEN}"
-    echo "=============================================================================="
-    echo "🎉 部署验证通过！系统可正常使用"
-    echo "=============================================================================="
-    echo -e "${NC}"
-    
-    echo -e "${CYAN}🌐 访问地址:${NC}"
-    echo -e "   🌐 主站: ${GREEN}http://114.132.189.90${NC}"
-    echo -e "   📚 题库练习: ${GREEN}http://114.132.189.90/practice${NC}"
-    echo -e "   📅 每日十题: ${GREEN}http://114.132.189.90/daily${NC}"
-    echo ""
-    
-    echo -e "${CYAN}🎮 使用提示:${NC}"
-    echo -e "   🎯 按下 ${YELLOW}Alt + B${NC} 可开启老板模式"
-    echo -e "   📱 支持手机、平板、电脑访问"
-    echo -e "   🔄 每日十题自动刷新"
-    echo ""
-    
-    exit 0
+if [ "$API_FUNCTIONAL" = "pass" ]; then
+    echo "✅ API端点响应正常"
 else
-    echo -e "${RED}"
-    echo "=============================================================================="
-    echo "⚠️  部署验证未完全通过，请检查以下问题"
-    echo "=============================================================================="
-    echo -e "${NC}"
-    
-    echo -e "${YELLOW}建议操作:${NC}"
-    
-    if [ "$WEB_STATUS" -ne 1 ]; then
-        echo -e "   🔧 检查Web容器: ${BLUE}docker-compose logs web${NC}"
-    fi
-    
-    if [ "$API_STATUS" -ne 1 ]; then
-        echo -e "   🔧 检查API容器: ${BLUE}docker-compose logs api${NC}"
-    fi
-    
-    if [ "$DB_STATUS" -ne 1 ]; then
-        echo -e "   🔧 检查MySQL容器: ${BLUE}docker-compose logs mysql${NC}"
-    fi
-    
-    if [ "$PASS_RATE" -lt 90 ]; then
-        echo -e "   🔄 重新部署: ${BLUE}sudo ./deploy-centos7.sh${NC}"
-        echo -e "   🔍 系统优化: ${BLUE}sudo ./scripts/centos7-optimization.sh${NC}"
-    fi
-    
-    echo ""
-    echo -e "${BLUE}📋 配置文件位置:${NC}"
-    echo -e "   📄 环境配置: ${YELLOW}.env${NC}"
-    echo -e "   📄 部署备份: ${YELLOW}deploy-config.txt${NC}"
-    echo ""
-    
-    exit 1
+    echo "❌ 部分API端点响应异常"
 fi
+
+TEST_RESULTS+=("api-functional:$API_FUNCTIONAL")
+
+# 测试5: 静态资源检查
+echo ""
+echo "📋 测试5: 静态资源检查"
+STATIC_RESOURCES=(
+    "/"
+    "/linux"
+    "/docker"
+    "/practice"
+)
+
+WEB_STATIC="pass"
+for path in "${STATIC_RESOURCES[@]}"; do
+    RESPONSE=$(curl -s -w "%{http_code}" -o /dev/null "http://localhost$path" || echo "000")
+    if [ "$RESPONSE" != "200" ]; then
+        echo "❌ 页面 $path 加载失败 (HTTP $RESPONSE)"
+        WEB_STATIC="fail"
+    fi
+done
+
+if [ "$WEB_STATIC" = "pass" ]; then
+    echo "✅ 静态资源加载正常"
+else
+    echo "❌ 部分静态资源加载失败"
+fi
+
+TEST_RESULTS+=("static-resources:$WEB_STATIC")
+
+# 测试6: 外部访问测试
+echo ""
+echo "📋 测试6: 外部访问测试"
+if [ "$SERVER_IP" != "localhost" ]; then
+    EXTERNAL_WEB=$(curl -s -w "%{http_code}" -o /dev/null --max-time 10 "http://$SERVER_IP/health" || echo "000")
+    if [ "$EXTERNAL_WEB" = "200" ]; then
+        echo "✅ 外部访问正常"
+        EXTERNAL_TEST="pass"
+    else
+        echo "❌ 外部访问失败 (HTTP $EXTERNAL_WEB)"
+        echo "💡 请检查防火墙设置和网络配置"
+        EXTERNAL_TEST="fail"
+    fi
+else
+    echo "⚠️  跳过外部访问测试（无法获取公网IP）"
+    EXTERNAL_TEST="skip"
+fi
+
+TEST_RESULTS+=("external-access:$EXTERNAL_TEST")
+
+# 生成验证报告
+echo ""
+echo "📊 验证结果报告"
+echo "================================"
+
+PASS_COUNT=0
+FAIL_COUNT=0
+SKIP_COUNT=0
+
+for result in "${TEST_RESULTS[@]}"; do
+    test_name=$(echo "$result" | cut -d':' -f1)
+    test_status=$(echo "$result" | cut -d':' -f2)
+    
+    case "$test_status" in
+        "pass")
+            echo "✅ $test_name: 通过"
+            ((PASS_COUNT++))
+            ;;
+        "fail")
+            echo "❌ $test_name: 失败"
+            ((FAIL_COUNT++))
+            ;;
+        "skip")
+            echo "⚠️  $test_name: 跳过"
+            ((SKIP_COUNT++))
+            ;;
+    esac
+done
+
+echo ""
+echo "📈 统计信息:"
+echo "  通过: $PASS_COUNT"
+echo "  失败: $FAIL_COUNT"
+echo "  跳过: $SKIP_COUNT"
+
+# 总体评估
+TOTAL_TESTS=$((PASS_COUNT + FAIL_COUNT))
+if [ $TOTAL_TESTS -eq 0 ]; then
+    OVERALL="unknown"
+    STATUS_ICON="❓"
+elif [ $FAIL_COUNT -eq 0 ]; then
+    OVERALL="success"
+    STATUS_ICON="🟢"
+elif [ $PASS_COUNT -gt $FAIL_COUNT ]; then
+    OVERALL="partial"
+    STATUS_ICON="🟡"
+else
+    OVERALL="failed"
+    STATUS_ICON="🔴"
+fi
+
+echo ""
+echo "🎯 总体评估: $STATUS_ICON $OVERALL"
+
+case "$OVERALL" in
+    "success")
+        echo "🎉 部署完全成功！系统运行正常"
+        echo ""
+        echo "🌐 立即访问:"
+        echo "  主站: http://$SERVER_IP"
+        echo "  开始学习: http://$SERVER_IP/linux"
+        ;;
+    "partial")
+        echo "⚠️  部署部分成功，部分功能可能受限"
+        echo ""
+        echo "🔧 建议检查:"
+        echo "  查看服务日志: docker-compose logs"
+        echo "  重启相关服务: docker-compose restart [service]"
+        ;;
+    "failed")
+        echo "❌ 部署验证失败，请排查问题"
+        echo ""
+        echo "🚨 紧急处理:"
+        echo "  查看详细日志: docker-compose logs --tail=50"
+        echo "  重新部署: docker-compose down && docker-compose up -d"
+        echo "  完整重建: docker-compose down && docker-compose build --no-cache && docker-compose up -d"
+        ;;
+    "unknown")
+        echo "❓ 无法确定部署状态"
+        ;;
+esac
+
+# 性能建议
+echo ""
+echo "💡 性能优化建议:"
+echo "  1. 定期清理Docker缓存: docker system prune -f"
+echo "  2. 监控资源使用: docker stats"
+echo "  3. 定期备份数据库: docker-compose exec mysql mysqldump ..."
+echo "  4. 检查磁盘空间: df -h"
+
+echo ""
+echo "📞 如需帮助，请访问:"
+echo "  问题反馈: https://github.com/YYY2579/moyu/issues"
+echo "  文档地址: https://github.com/YYY2579/moyu/blob/main/README.md"
+echo "================================"

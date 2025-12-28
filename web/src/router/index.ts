@@ -30,6 +30,16 @@ const routes: RouteRecordRaw[] = [
     path: '/progress',
     name: 'Progress',
     component: () => import('@/views/Progress.vue')
+  },
+  {
+    path: '/tools',
+    name: 'Tools',
+    component: () => import('@/views/Tools.vue')
+  },
+  {
+    path: '/shortcuts',
+    name: 'Shortcuts',
+    component: () => import('@/views/Shortcuts.vue')
   }
 ]
 
