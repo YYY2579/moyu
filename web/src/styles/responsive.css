@@ -1,0 +1,321 @@
+/* 全局响应式样式 */
+
+/* 基础断点 */
+:root {
+  --mobile-breakpoint: 768px;
+  --tablet-breakpoint: 1024px;
+  --desktop-breakpoint: 1200px;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  /* 通用容器优化 */
+  .main-content,
+  .header-content {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+  }
+
+  /* 标题字体调整 */
+  h1 {
+    font-size: 24px !important;
+  }
+
+  h2 {
+    font-size: 20px !important;
+  }
+
+  h3 {
+    font-size: 18px !important;
+  }
+
+  /* 按钮优化 */
+  .el-button {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .el-button--large {
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+
+  /* 卡片间距调整 */
+  .el-card {
+    margin-bottom: 15px !important;
+  }
+
+  .el-card__body {
+    padding: 15px !important;
+  }
+
+  /* 网格布局优化 */
+  .el-row {
+    margin-left: -7.5px !important;
+    margin-right: -7.5px !important;
+  }
+
+  .el-col {
+    padding-left: 7.5px !important;
+    padding-right: 7.5px !important;
+  }
+
+  /* 输入框优化 */
+  .el-input__inner {
+    height: 40px;
+    font-size: 16px; /* 防止iOS自动缩放 */
+  }
+
+  /* 表格优化 */
+  .el-table {
+    font-size: 14px;
+  }
+
+  .el-table th,
+  .el-table td {
+    padding: 8px 5px !important;
+  }
+
+  /* 对话框优化 */
+  .el-dialog {
+    width: 95% !important;
+    margin: 5vh auto !important;
+  }
+
+  .el-dialog__body {
+    padding: 15px !important;
+  }
+
+  /* 抽屉优化 */
+  .el-drawer {
+    width: 85% !important;
+  }
+
+  /* 标签页优化 */
+  .el-tabs__item {
+    font-size: 14px;
+    padding: 0 10px;
+  }
+
+  /* 进度条优化 */
+  .el-progress-bar__outer {
+    height: 6px !important;
+  }
+
+  /* 徽章优化 */
+  .el-tag {
+    font-size: 12px;
+    padding: 0 6px;
+    height: 20px;
+    line-height: 20px;
+  }
+
+  /* 步骤条优化 */
+  .el-step__title {
+    font-size: 12px !important;
+  }
+
+  .el-step__description {
+    font-size: 10px !important;
+  }
+
+  /* 时间轴优化 */
+  .el-timeline-item__timestamp {
+    font-size: 12px;
+  }
+
+  /* 分页器优化 */
+  .el-pagination {
+    text-align: center;
+  }
+
+  .el-pagination .el-pager li {
+    min-width: 32px;
+    height: 32px;
+    line-height: 32px;
+    font-size: 14px;
+  }
+
+  /* 折叠面板优化 */
+  .el-collapse-item__header {
+    font-size: 14px;
+    padding: 12px 15px;
+  }
+
+  .el-collapse-item__content {
+    padding: 15px;
+    font-size: 14px;
+  }
+
+  /* 单选框和复选框优化 */
+  .el-radio__label,
+  .el-checkbox__label {
+    font-size: 14px;
+    word-break: break-all;
+  }
+
+  /* 下拉菜单优化 */
+  .el-select-dropdown__item {
+    font-size: 14px;
+    padding: 8px 15px;
+  }
+
+  /* 消息提示优化 */
+  .el-message {
+    min-width: 300px;
+    font-size: 14px;
+  }
+
+  /* 通知优化 */
+  .el-notification {
+    width: 320px;
+    font-size: 14px;
+  }
+
+  /* 加载优化 */
+  .el-loading-text {
+    font-size: 14px;
+  }
+
+  /* 空状态优化 */
+  .el-empty__description {
+    font-size: 14px;
+  }
+
+  /* 图片优化 */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* 滚动条优化 */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+
+  /* 触摸优化 */
+  .clickable,
+  .el-button,
+  .el-card,
+  .el-menu-item,
+  .el-tabs__item {
+    min-height: 44px; /* iOS推荐的最小触摸目标 */
+  }
+
+  /* 文本选择优化 */
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* 动画性能优化 */
+  .transition-all {
+    transition: all 0.3s ease;
+    will-change: transform;
+  }
+
+  /* 焦点状态优化 */
+  .el-button:focus,
+  .el-input__inner:focus,
+  .el-select:focus .el-input__inner {
+    outline: 2px solid #409eff;
+    outline-offset: 2px;
+  }
+}
+
+/* 平板优化 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .main-content,
+  .header-content {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  h1 {
+    font-size: 26px !important;
+  }
+
+  h2 {
+    font-size: 22px !important;
+  }
+
+  .el-dialog {
+    width: 85% !important;
+  }
+}
+
+/* 大屏优化 */
+@media (min-width: 1200px) {
+  .main-content,
+  .header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+}
+
+/* 横屏优化 */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .page-header {
+    padding: 10px 20px !important;
+  }
+
+  .header-content h1 {
+    font-size: 20px !important;
+  }
+
+  .main-content {
+    padding: 15px 20px !important;
+  }
+
+  .el-dialog {
+    margin: 10px auto !important;
+    max-height: 90vh;
+  }
+}
+
+/* 高分辨率屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .el-icon {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* 暗色模式支持预留 */
+@media (prefers-color-scheme: dark) {
+  /* 暗色模式样式可以在这里添加 */
+}
+
+/* 减少动画（用户偏好） */
+@media (prefers-reduced-motion: reduce) {
+  .transition-all {
+    transition: none !important;
+  }
+
+  .el-loading-mask {
+    animation: none !important;
+  }
+
+  .el-fade-in-enter-active,
+  .el-fade-in-leave-active,
+  .el-zoom-in-enter-active,
+  .el-zoom-in-leave-active {
+    transition: none !important;
+  }
+}
